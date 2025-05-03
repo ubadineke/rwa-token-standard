@@ -19,8 +19,8 @@ pub struct CreateAsset<'info> {
     #[account(mut)]
     authority: Signer<'info>,
 
-    #[account()]
-    mint: Box<Account<'info, Mint>>,
+    #[account(mut)]
+    mint: Box<InterfaceAccount<'info, Mint>>,
 
     #[account(
     init,
@@ -37,13 +37,10 @@ pub struct CreateAsset<'info> {
     pub system_program: Program<'info, System>,
     pub token_program: Program<'info, Token2022>,
     pub associated_token_program: Program<'info, AssociatedToken>,
-    /// CHECK: token metadata program account
     pub token_metadata_program: Program<'info, Metadata>,
-    pub rent: UncheckedAccount<'info>,
 }
 
 impl CreateAsset<'_> {
-
     pub fn handler(ctx: Context<CreateAsset>, params: CreateAssetParams) -> Result<()> {
         let mint = ctx.accounts.mint.key();
 
@@ -53,16 +50,16 @@ impl CreateAsset<'_> {
 
         let asset = &mut ctx.accounts.asset;
         ctx.accounts
-            .initialize_token_metadata(&params, mint_auth_signer_seeds);
+            .initialize_token_metadata(&params, mint_auth_signer_seeds)?;
 
-        emit!(AssetMetadataEvent{
-          mint: ctx.accounts.mint.key().to_string(), 
-          name: Some(params.name),
-          symbol: Some(params.symbol),
-          uri: Some(params.uri),
-          decimals: Some(ctx.accounts.mint.decimals)
+        emit!(AssetMetadataEvent {
+            mint: ctx.accounts.mint.key().to_string(),
+            name: Some(params.name),
+            symbol: Some(params.symbol),
+            uri: Some(params.uri),
+            decimals: Some(ctx.accounts.mint.decimals)
         });
-    
+
         Ok(())
     }
 
@@ -83,7 +80,12 @@ impl CreateAsset<'_> {
             cpi_accounts,
             signer_seeds,
         );
-        token_metadata_initialize(cpi_ctx, params.name.clone(), params.symbol.clone(), params.uri.clone())?;
+        token_metadata_initialize(
+            cpi_ctx,
+            params.name.clone(),
+            params.symbol.clone(),
+            params.uri.clone(),
+        )?;
         Ok(())
     }
 }
