@@ -31,13 +31,8 @@ pub struct CreateAsset<'info> {
   )]
     asset: Box<Account<'info, Asset>>,
 
-    #[account(mut)]
-    metadata: UncheckedAccount<'info>,
-
     pub system_program: Program<'info, System>,
     pub token_program: Program<'info, Token2022>,
-    pub associated_token_program: Program<'info, AssociatedToken>,
-    pub token_metadata_program: Program<'info, Metadata>,
 }
 
 impl CreateAsset<'_> {
