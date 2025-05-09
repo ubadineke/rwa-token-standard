@@ -23,7 +23,7 @@ fn litesvm_test() {
     svm.airdrop(&from, 10_000).unwrap();
 
     let program_id = rwa_token_standard::ID;
-    let program_bytes = include_bytes!("../../../target/deploy/rwa_token_standard.so");
+    let program_bytes = include_bytes!("../../.././target/deploy/rwa_token_standard.so");
 
     svm.add_program(program_id, program_bytes);
 
@@ -72,7 +72,6 @@ fn litesvm_test() {
             dbg!(e.meta.logs);
         }
     }
-
 
     // let to_account = svm.get_account(&to);
     let asset = svm.get_account(&asset_pda).unwrap();
