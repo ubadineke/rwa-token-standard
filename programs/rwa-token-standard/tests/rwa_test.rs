@@ -18,10 +18,14 @@ use spl_token_2022::{instruction as token_instruction, state::Mint};
 fn litesvm_test() {
     let from_keypair = Keypair::new();
     let from = from_keypair.pubkey();
+    let mint = Keypair::new();
     // let to = Pubkey::new_unique();
+    dbg!(from_keypair.pubkey());
+    dbg!(mint.pubkey());
 
     let mut svm = LiteSVM::new();
-    svm.airdrop(&from, 1_000_000_000).unwrap();
+    svm.airdrop(&from, 2_000_000_000).unwrap();
+    // svm.airdrop(&mint.pubkey(), 1_000_000_000).unwrap();
 
     let program_id = rwa_token_standard::ID;
     let program_bytes = include_bytes!("../../.././target/deploy/rwa_token_standard.so");
@@ -36,22 +40,21 @@ fn litesvm_test() {
         delegate: None,
     };
 
-    let mint = Keypair::new();
-    //Create Account for Mint
-    let create_account_ix = system_instruction::create_account(
-        &from,
-        &mint.pubkey(),
-        // (Rent::get().unwrap()).minimum_balance(Mint::LEN),
-        svm.minimum_balance_for_rent_exemption(Mint::LEN),
-        Mint::LEN as u64,
-        &token_2022::ID,
-    );
+    // //Create Account for Mint
+    // let create_account_ix = system_instruction::create_account(
+    //     &from,
+    //     &mint.pubkey(),
+    //     // (Rent::get().unwrap()).minimum_balance(Mint::LEN),
+    //     svm.minimum_balance_for_rent_exemption(Mint::LEN),
+    //     Mint::LEN as u64,
+    //     &token_2022::ID,
+    // );
 
-    dbg!(&token_2022::ID);
-    //Initialize Account as Mint
-    let mint_init_ix =
-        token_instruction::initialize_mint(&token_2022::ID, &mint.pubkey(), &from, Some(&from), 9)
-            .unwrap();
+    // dbg!(&token_2022::ID);
+    // //Initialize Account as Mint
+    // let mint_init_ix =
+    //     token_instruction::initialize_mint(&token_2022::ID, &mint.pubkey(), &from, Some(&from), 9)
+    //         .unwrap();
 
     //Derive Asset PDA
     let asset_pda = Pubkey::find_program_address(
@@ -59,7 +62,7 @@ fn litesvm_test() {
         &rwa_token_standard::ID,
     )
     .0;
-
+    dbg!(asset_pda);
     let init_ix = Instruction {
         program_id: rwa_token_standard::ID,
         accounts: rwa_token_standard::accounts::CreateAsset {
@@ -77,24 +80,27 @@ fn litesvm_test() {
     };
 
     let tx = Transaction::new(
-        &[&from_keypair, &mint],
-        Message::new(&[create_account_ix, mint_init_ix, init_ix], Some(&from)),
+        &[&mint, &from_keypair],
+        Message::new(&[init_ix], Some(&from)),
         svm.latest_blockhash(),
     );
     let tx_res = svm.send_transaction(tx);
-
+    // dbg!(tx_res);
     match tx_res {
         Ok(res) => {
             dbg!(res.logs);
         }
         Err(e) => {
+            dbg!(e.err);
             dbg!(e.meta.logs);
         }
     }
 
+    let mint = svm.get_account(&mint.pubkey()).unwrap();
+    dbg!(mint);
     // let to_account = svm.get_account(&to);
-    let asset = svm.get_account(&asset_pda).unwrap(); 
-    dbg!(asset);
+    // let asset = svm.get_account(&asset_pda).unwrap();
+    // dbg!(asset);
 
     // let from_account = svm.get_account(&from);
     // // let to_account = svm.get_account(&to);

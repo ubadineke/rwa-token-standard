@@ -6,12 +6,15 @@ use anchor_lang::system_program::{create_account, CreateAccount};
 use anchor_spl::{
     token_2022::{
         initialize_mint2,
-        spl_token_2022::{extension::ExtensionType, pod::PodMint},
+        spl_token_2022::{
+            extension::{metadata_pointer::MetadataPointer, ExtensionType},
+            pod::PodMint,
+        },
         InitializeMint2,
     },
     token_interface::{
-        metadata_pointer_initialize, token_metadata_initialize,
-        MetadataPointerInitialize, Mint, Token2022, TokenMetadataInitialize,
+        metadata_pointer_initialize, token_metadata_initialize, MetadataPointerInitialize,
+        Token2022, TokenMetadataInitialize,
     },
 };
 
@@ -21,7 +24,7 @@ pub struct CreateAsset<'info> {
     authority: Signer<'info>,
 
     #[account(mut)]
-    mint: Box<InterfaceAccount<'info, Mint>>,
+    mint: Signer<'info>,
 
     #[account(
     init,
@@ -91,20 +94,20 @@ impl CreateAsset<'_> {
             Some(&ctx.accounts.authority.key()),
         )?;
 
-        ctx.accounts
-            .initialize_token_metadata(&params, mint_auth_signer_seeds)?;
+        // ctx.accounts
+        //     .initialize_token_metadata(&params, mint_auth_signer_seeds)?;
 
-        let asset = &mut ctx.accounts.asset;
-        asset.authority = ctx.accounts.authority.key();
-        asset.mint = ctx.accounts.mint.key();
-        asset.status = true;
+        // let asset = &mut ctx.accounts.asset;
+        // asset.authority = ctx.accounts.authority.key();
+        // asset.mint = ctx.accounts.mint.key();
+        // asset.status = true;
 
         emit!(AssetMetadataEvent {
             mint: ctx.accounts.mint.key().to_string(),
             name: Some(params.name),
             symbol: Some(params.symbol),
             uri: Some(params.uri),
-            decimals: Some(ctx.accounts.mint.decimals)
+            decimals: Some(6)
         });
 
         Ok(())
