@@ -17,7 +17,6 @@ pub struct Asset {
     pub status: bool,
     //delegate, carry out instructions on behalf of the creator
     pub delegate: Option<Pubkey>,
-
     pub bump: u8,
 }
 

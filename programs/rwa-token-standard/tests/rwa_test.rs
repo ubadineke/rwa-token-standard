@@ -1,5 +1,5 @@
-use anchor_lang::{system_program, InstructionData, ToAccountMetas};
-use anchor_spl::token_2022;
+use anchor_lang::{system_program, AnchorDeserialize, InstructionData, ToAccountMetas};
+use anchor_spl::{token_2022::{self, spl_token_2022::extension::metadata_pointer::MetadataPointer}, token_interface::get_mint_extension_data};
 use litesvm::LiteSVM;
 use rwa_token_standard::{constants::*, states::*};
 use solana_keypair::Keypair;
@@ -99,12 +99,14 @@ fn litesvm_test() {
 
     let mint = svm.get_account(&mint.pubkey()).unwrap();
     dbg!(&mint);
-    // let deserialized_mint = spl_token_2022::state::Mint::unpack(&mint.data).unwrap();
+    let deserialized_mint = spl_token_2022::state::Mint::unpack(&mint.data).unwrap();
     // dbg!(deserialized_mint);
 
     // let to_account = svm.get_account(&to);
     let asset = svm.get_account(&asset_pda).unwrap();
-    dbg!(asset);
+    // dbg!(&asset);
+
+    let deserialized_asset = Asset::try_from_slice(&asset.data).unwrap();
 
     // let from_account = svm.get_account(&from);
     // // let to_account = svm.get_account(&to);

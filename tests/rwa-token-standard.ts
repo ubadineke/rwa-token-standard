@@ -1,6 +1,7 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { RwaTokenStandard } from "../target/types/rwa_token_standard";
+import { getTokenMetadata } from "@solana/spl-token";
 
 describe("rwa-token-standard", () => {
   // Configure the client to use the local cluster.
@@ -34,5 +35,7 @@ describe("rwa-token-standard", () => {
       })
       .signers([mint, authority])
       .rpc();
+    const chainMetadata = await getTokenMetadata(provider.connection, mint.publicKey);
+    console.log(chainMetadata);
   });
 });
