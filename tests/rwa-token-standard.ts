@@ -32,7 +32,7 @@ describe("rwa-token-standard", () => {
         authority: authority.publicKey,
         mint: mint.publicKey,
       })
-      .signers([authority, mint])
+      .signers([mint, authority])
       .rpc();
   });
 });

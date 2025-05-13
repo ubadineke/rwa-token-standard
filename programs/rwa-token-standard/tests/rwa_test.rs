@@ -62,6 +62,7 @@ fn litesvm_test() {
         &rwa_token_standard::ID,
     )
     .0;
+
     dbg!(asset_pda);
     let init_ix = Instruction {
         program_id: rwa_token_standard::ID,
@@ -97,10 +98,13 @@ fn litesvm_test() {
     }
 
     let mint = svm.get_account(&mint.pubkey()).unwrap();
-    dbg!(mint);
+    dbg!(&mint);
+    // let deserialized_mint = spl_token_2022::state::Mint::unpack(&mint.data).unwrap();
+    // dbg!(deserialized_mint);
+
     // let to_account = svm.get_account(&to);
-    // let asset = svm.get_account(&asset_pda).unwrap();
-    // dbg!(asset);
+    let asset = svm.get_account(&asset_pda).unwrap();
+    dbg!(asset);
 
     // let from_account = svm.get_account(&from);
     // // let to_account = svm.get_account(&to);

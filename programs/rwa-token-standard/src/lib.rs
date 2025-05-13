@@ -5,6 +5,7 @@ use anchor_lang::prelude::*;
 pub mod constants;
 pub mod instructions;
 pub mod states;
+pub mod utils;
 
 declare_id!("B56D3RPexpgAwgSbPV9Upwnu1wKN25eChYMB9AhuL9Nb");
 
