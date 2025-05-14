@@ -1,5 +1,8 @@
 use anchor_lang::{system_program, AnchorDeserialize, InstructionData, ToAccountMetas};
-use anchor_spl::{token_2022::{self, spl_token_2022::extension::metadata_pointer::MetadataPointer}, token_interface::get_mint_extension_data};
+use anchor_spl::{
+    token_2022::{self, spl_token_2022::extension::metadata_pointer::MetadataPointer},
+    token_interface::get_mint_extension_data,
+};
 use litesvm::LiteSVM;
 use rwa_token_standard::{constants::*, states::*};
 use solana_keypair::Keypair;
@@ -12,7 +15,7 @@ use solana_program::{
 };
 use solana_transaction::Transaction;
 // use spl_token::{instruction as token_instruction, state::Mint, };
-use spl_token_2022::{instruction as token_instruction, state::Mint};
+// use spl_token_2022::{instruction as token_instruction, state::Mint};
 
 #[test]
 fn litesvm_test() {
@@ -99,7 +102,9 @@ fn litesvm_test() {
 
     let mint = svm.get_account(&mint.pubkey()).unwrap();
     dbg!(&mint);
-    let deserialized_mint = spl_token_2022::state::Mint::unpack(&mint.data).unwrap();
+    // let deserialized_mint = spl_token_2022::state::Mint::unpack(&mint.data).unwrap();
+    let ddata = mpl_token_metadata::accounts::Metadata::from_bytes(&mint.data).unwrap();
+    dbg!(ddata);
     // dbg!(deserialized_mint);
 
     // let to_account = svm.get_account(&to);

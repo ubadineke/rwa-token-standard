@@ -16,7 +16,7 @@ pub struct Asset {
     //active or disabled
     pub status: bool,
     //delegate, carry out instructions on behalf of the creator
-    pub delegate: Option<Pubkey>,
+    // pub delegate: Option<String>,
     pub bump: u8,
 }
 

@@ -18,8 +18,13 @@ pub mod rwa_token_standard {
         Ok(())
     }
 
-    pub fn create_asset(ctx: Context<CreateAsset>, params: CreateAssetParams) -> Result<()> {
-        CreateAsset::handler(ctx, params)?;
+    pub fn create_asset(
+        ctx: Context<CreateAsset>,
+        name: String,
+        symbol: String,
+        uri: String
+    ) -> Result<()> {
+        CreateAsset::handler(ctx, name, symbol, uri)?;
         Ok(())
     }
 }

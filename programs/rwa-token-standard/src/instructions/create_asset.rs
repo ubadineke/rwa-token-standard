@@ -3,6 +3,7 @@ use crate::states::*;
 use anchor_lang::prelude::*;
 use anchor_lang::system_program::{create_account, CreateAccount};
 
+use crate::utils::update_account_lamports_to_minimum_balance;
 use anchor_spl::{
     token_2022::{
         initialize_mint2,
@@ -13,11 +14,10 @@ use anchor_spl::{
         InitializeMint2,
     },
     token_interface::{
-        metadata_pointer_initialize, token_metadata_initialize, MetadataPointerInitialize,
-        Token2022, TokenMetadataInitialize, Mint
+        metadata_pointer_initialize, token_metadata_initialize, MetadataPointerInitialize, Mint,
+        Token2022, TokenMetadataInitialize,
     },
 };
-use crate::utils::update_account_lamports_to_minimum_balance;
 
 #[derive(Accounts)]
 pub struct CreateAsset<'info> {
@@ -51,94 +51,56 @@ pub struct CreateAsset<'info> {
 }
 
 impl CreateAsset<'_> {
-    pub fn handler(ctx: Context<CreateAsset>, params: CreateAssetParams) -> Result<()> {
-
+    pub fn handler(
+        ctx: Context<CreateAsset>,
+        name: String,
+        symbol: String,
+        uri: String,
+    ) -> Result<()> {
         let asset = &mut ctx.accounts.asset;
         asset.authority = ctx.accounts.authority.key();
         asset.mint = ctx.accounts.mint.key();
         asset.status = true;
+        // asset.delegate = delegate;
 
-        
         // let mint = ctx.accounts.mint.key();
-        
+
         let mint_key = ctx.accounts.mint.key();
         let mint_auth_signer_seeds: &[&[&[u8]]] =
-        &[&[ASSET.as_bytes(), &mint_key.as_ref(), &[ctx.bumps.asset]]];
-        
-        ctx.accounts
-            .initialize_token_metadata(&params, mint_auth_signer_seeds)?;
+            &[&[ASSET.as_bytes(), &mint_key.as_ref(), &[ctx.bumps.asset]]];
+
+        ctx.accounts.initialize_token_metadata(
+            &name,
+            &symbol,
+            &uri,
+            mint_auth_signer_seeds,
+        )?;
 
         ctx.accounts.mint.reload()?;
-        
-        // // Calculate space required for mint and extension data
-        // let mint_size =
-        //     ExtensionType::try_calculate_account_len::<PodMint>(&[ExtensionType::MetadataPointer])?;
 
-        // // Calculate minimum lamports required for size of mint account with extensions
-        // let lamports = (Rent::get()?).minimum_balance(mint_size);
-
-        // // Invoke System Program to create new account with space for mint and extension data
-        // create_account(
-        //     CpiContext::new(
-        //         ctx.accounts.system_program.to_account_info(),
-        //         CreateAccount {
-        //             from: ctx.accounts.authority.to_account_info(),
-        //             to: ctx.accounts.mint.to_account_info(),
-        //         },
-        //     ),
-        //     lamports,
-        //     mint_size as u64,
-        //     &ctx.accounts.token_program.key(),
-        // )?;
-
-        // // Initialize the MetadataPointer extension
-        // // This instruction must come before the instruction to initialize the mint data
-        // metadata_pointer_initialize(
-        //     CpiContext::new(
-        //         ctx.accounts.token_program.to_account_info(),
-        //         MetadataPointerInitialize {
-        //             token_program_id: ctx.accounts.token_program.to_account_info(),
-        //             mint: ctx.accounts.mint.to_account_info(),
-        //         },
-        //     ),
-        //     Some(ctx.accounts.authority.key()),
-        //     Some(mint.key()),
-        // )?;
-
-        // initialize_mint2(
-        //     CpiContext::new(
-        //         ctx.accounts.token_program.to_account_info(),
-        //         InitializeMint2 {
-        //             mint: ctx.accounts.mint.to_account_info(),
-        //         },
-        //     ),
-        //     6,
-        //     &ctx.accounts.authority.key(),
-        //     Some(&ctx.accounts.authority.key()),
-        // )?;
-
-
-          // transfer minimum rent to mint account
+        // transfer minimum rent to mint account
         update_account_lamports_to_minimum_balance(
             ctx.accounts.mint.to_account_info(),
             ctx.accounts.authority.to_account_info(),
             ctx.accounts.system_program.to_account_info(),
         )?;
-    
+
         emit!(AssetMetadataEvent {
             mint: ctx.accounts.mint.key().to_string(),
-            name: Some(params.name),
-            symbol: Some(params.symbol),
-            uri: Some(params.uri),
+            name: Some(name),
+            symbol: Some(symbol),
+            uri: Some(uri),
             decimals: Some(6)
         });
 
         Ok(())
     }
-    
+
     fn initialize_token_metadata(
         &self,
-        params: &CreateAssetParams,
+        name: &String,
+        symbol: &String,
+        uri: &String,
         signer_seeds: &[&[&[u8]]],
     ) -> Result<()> {
         let cpi_accounts = TokenMetadataInitialize {
@@ -153,12 +115,7 @@ impl CreateAsset<'_> {
             cpi_accounts,
             signer_seeds,
         );
-        token_metadata_initialize(
-            cpi_ctx,
-            params.name.clone(),
-            params.symbol.clone(),
-            params.uri.clone(),
-        )?;
+        token_metadata_initialize(cpi_ctx, name.clone(), symbol.clone(), uri.clone(), )?;
         Ok(())
     }
 }

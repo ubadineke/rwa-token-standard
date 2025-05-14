@@ -2428,6 +2428,7 @@ dependencies = [
  "anchor-lang",
  "anchor-spl",
  "litesvm",
+ "mpl-token-metadata",
  "solana-instruction",
  "solana-keypair",
  "solana-message",
